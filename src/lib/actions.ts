@@ -22,7 +22,7 @@ export async function createStudentAction(formData: FormData) {
     memo: str(formData, "memo"),
   });
 
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   redirect(`/students/${id}`);
 }
 
@@ -42,13 +42,13 @@ export async function updateStudentAction(
     memo: str(formData, "memo"),
   });
 
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   revalidatePath(`/students/${studentId}`);
 }
 
 export async function deleteStudentAction(studentId: number) {
   data.deleteStudent(studentId);
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   redirect("/");
 }
 
@@ -72,6 +72,7 @@ export async function createConsultationAction(
   });
 
   revalidatePath(`/students/${studentId}`);
+  revalidatePath("/");
 }
 
 export async function deleteConsultationAction(
@@ -80,6 +81,7 @@ export async function deleteConsultationAction(
 ) {
   data.deleteConsultation(consultationId);
   revalidatePath(`/students/${studentId}`);
+  revalidatePath("/");
 }
 
 export async function createSkillCheckAction(
