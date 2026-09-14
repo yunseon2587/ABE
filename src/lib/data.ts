@@ -24,6 +24,21 @@ export function getStudents(search?: string): Student[] {
     .all() as Student[];
 }
 
+export function getUpcomingConsultations(
+  limit = 5
+): (Consultation & { student_name: string })[] {
+  return db
+    .prepare(
+      `SELECT c.*, s.name AS student_name
+       FROM consultations c
+       JOIN students s ON s.id = c.student_id
+       WHERE c.status = 'planned'
+       ORDER BY c.consult_date ASC
+       LIMIT ?`
+    )
+    .all(limit) as (Consultation & { student_name: string })[];
+}
+
 export function getStudent(id: number): Student | undefined {
   return db.prepare(`SELECT * FROM students WHERE id = ?`).get(id) as
     | Student

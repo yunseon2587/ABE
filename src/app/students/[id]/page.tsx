@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { getStudent } from "@/lib/data";
 import { updateStudentAction, deleteStudentAction } from "@/lib/actions";
 import { Tabs } from "@/components/Tabs";
@@ -23,10 +22,6 @@ export default async function StudentPage({
 
   return (
     <div className="space-y-6">
-      <Link href="/" className="text-sm text-slate-500 hover:text-slate-800">
-        ← 학생 목록으로
-      </Link>
-
       <details className="rounded-lg border border-slate-200 bg-white">
         <summary className="cursor-pointer list-none p-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
