@@ -11,15 +11,15 @@ export function Tabs({
 
   return (
     <div>
-      <div className="flex gap-1 border-b border-slate-200">
+      <div className="flex gap-1 border-b border-neutral-200">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActive(tab.key)}
             className={`-mb-px rounded-t-md border-b-2 px-4 py-2 text-sm font-medium transition ${
               active === tab.key
-                ? "border-slate-800 text-slate-900"
-                : "border-transparent text-slate-500 hover:text-slate-700"
+                ? "border-pink-400 text-neutral-900"
+                : "border-transparent text-neutral-500 hover:text-neutral-700"
             }`}
           >
             {tab.label}

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import { UNGROUPED_GRADE_LABEL, compareGrades } from "@/lib/grade";
+import { logoutAction } from "@/lib/auth-actions";
+import { BrandLogo } from "@/components/BrandLogo";
 
 type SidebarStudent = {
   id: number;
@@ -55,13 +57,16 @@ export function Sidebar({ students }: { students: SidebarStudent[] }) {
   }
 
   return (
-    <aside className="flex h-full w-64 shrink-0 flex-col bg-slate-700 text-slate-200">
-      <div className="px-5 pt-6 pb-4">
-        <Link href="/" className="block text-xl font-bold tracking-tight text-teal-400">
-          ABE
-        </Link>
-        <p className="mt-0.5 text-xs text-slate-400">학생 관리</p>
-      </div>
+    <aside className="flex h-full w-64 shrink-0 flex-col bg-neutral-900 text-neutral-300">
+      <Link href="/" className="flex items-center gap-3 px-5 pt-6 pb-4">
+        <BrandLogo size="sm" />
+        <div>
+          <div className="text-sm font-bold leading-tight tracking-tight text-white">
+            ABLE ENGLISH
+          </div>
+          <p className="text-xs text-neutral-500">학생 관리</p>
+        </div>
+      </Link>
 
       <div className="px-4">
         <input
@@ -69,19 +74,19 @@ export function Sidebar({ students }: { students: SidebarStudent[] }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="학생 이름 검색"
-          className="w-full rounded-md border border-slate-600 bg-slate-800 px-3 py-1.5 text-sm text-slate-100 placeholder:text-slate-500 focus:border-teal-400 focus:outline-none"
+          className="w-full rounded-md border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm text-neutral-100 placeholder:text-neutral-500 focus:border-pink-300 focus:outline-none"
         />
       </div>
 
       <nav className="mt-4 flex-1 overflow-y-auto px-3 pb-4">
-        <div className="rounded-md bg-slate-800/60 p-2">
-          <div className="flex items-center justify-between px-2 py-1 text-sm font-semibold text-slate-100">
+        <div className="rounded-md bg-neutral-800/60 p-2">
+          <div className="flex items-center justify-between px-2 py-1 text-sm font-semibold text-neutral-100">
             학생관리
           </div>
 
           <div className="mt-1 space-y-1">
             {groups.length === 0 && (
-              <p className="px-3 py-2 text-xs text-slate-400">
+              <p className="px-3 py-2 text-xs text-neutral-500">
                 검색 결과가 없습니다.
               </p>
             )}
@@ -92,15 +97,15 @@ export function Sidebar({ students }: { students: SidebarStudent[] }) {
                   <button
                     type="button"
                     onClick={() => toggle(grade)}
-                    className="flex w-full items-center justify-between rounded px-2 py-1.5 text-left text-xs font-semibold text-slate-300 hover:bg-slate-700"
+                    className="flex w-full items-center justify-between rounded px-2 py-1.5 text-left text-xs font-semibold text-neutral-400 hover:bg-neutral-800"
                   >
                     <span>
-                      {grade} <span className="text-slate-500">({list.length})</span>
+                      {grade} <span className="text-neutral-600">({list.length})</span>
                     </span>
-                    <span className="text-slate-500">{open ? "▲" : "▼"}</span>
+                    <span className="text-neutral-600">{open ? "▲" : "▼"}</span>
                   </button>
                   {open && (
-                    <ul className="ml-2 border-l border-slate-600 pl-2">
+                    <ul className="ml-2 border-l border-neutral-700 pl-2">
                       {list.map((s) => {
                         const active = s.id === activeStudentId;
                         return (
@@ -109,8 +114,8 @@ export function Sidebar({ students }: { students: SidebarStudent[] }) {
                               href={`/students/${s.id}`}
                               className={`block rounded px-3 py-1.5 text-sm transition ${
                                 active
-                                  ? "bg-white font-semibold text-teal-600"
-                                  : "text-slate-300 hover:bg-slate-700 hover:text-white"
+                                  ? "bg-pink-300 font-semibold text-neutral-900"
+                                  : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
                               }`}
                             >
                               {s.name}
@@ -128,14 +133,22 @@ export function Sidebar({ students }: { students: SidebarStudent[] }) {
 
         <Link
           href="/students/new"
-          className="mt-3 block rounded-md px-3 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white"
+          className="mt-3 block rounded-md px-3 py-2 text-sm font-medium text-neutral-300 hover:bg-neutral-800 hover:text-white"
         >
           + 새 학생 등록
         </Link>
       </nav>
 
-      <div className="border-t border-slate-600 px-5 py-3 text-xs text-slate-400">
-        Able English Academy
+      <div className="border-t border-neutral-800 px-5 py-3">
+        <p className="text-xs text-neutral-500">Able English Academy</p>
+        <form action={logoutAction} className="mt-1">
+          <button
+            type="submit"
+            className="text-xs text-neutral-400 hover:text-pink-300 hover:underline"
+          >
+            로그아웃
+          </button>
+        </form>
       </div>
     </aside>
   );
