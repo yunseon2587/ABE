@@ -6,10 +6,13 @@ import { getPaymentStatus } from "@/lib/payment";
 import { Tabs } from "@/components/Tabs";
 import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
 import { PaymentStatusBadge } from "@/components/PaymentStatusBadge";
+import { PhoneInput } from "@/components/PhoneInput";
 import { ConsultationSection } from "./ConsultationSection";
 import { SkillCheckSection } from "./SkillCheckSection";
 import { WeeklyTestSection } from "./WeeklyTestSection";
 import { PaymentSection } from "./PaymentSection";
+import { SchoolExamSection } from "./SchoolExamSection";
+import { MakeupClassSection } from "./MakeupClassSection";
 
 export default async function StudentPage({
   params,
@@ -119,9 +122,9 @@ export default async function StudentPage({
               <label className="block text-sm font-medium text-neutral-700">
                 학생 연락처
               </label>
-              <input
+              <PhoneInput
                 name="phone"
-                defaultValue={student.phone ?? ""}
+                defaultValue={student.phone}
                 className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
               />
             </div>
@@ -129,9 +132,9 @@ export default async function StudentPage({
               <label className="block text-sm font-medium text-neutral-700">
                 학부모 연락처
               </label>
-              <input
+              <PhoneInput
                 name="parent_phone"
-                defaultValue={student.parent_phone ?? ""}
+                defaultValue={student.parent_phone}
                 className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
               />
             </div>
@@ -182,6 +185,16 @@ export default async function StudentPage({
             key: "tests",
             label: "주간 테스트",
             content: <WeeklyTestSection studentId={studentId} />,
+          },
+          {
+            key: "school-exams",
+            label: "학교 성적",
+            content: <SchoolExamSection studentId={studentId} />,
+          },
+          {
+            key: "makeup",
+            label: "보강 관리",
+            content: <MakeupClassSection studentId={studentId} />,
           },
           {
             key: "payments",

@@ -101,6 +101,29 @@ export async function createConsultationAction(
   revalidatePath("/");
 }
 
+export async function updateConsultationAction(
+  studentId: number,
+  consultationId: number,
+  formData: FormData
+) {
+  const content = str(formData, "content");
+  const consult_date = str(formData, "consult_date");
+  const status = str(formData, "status") as ConsultationStatus;
+  if (!content || !consult_date) {
+    throw new Error("날짜와 내용을 입력해주세요.");
+  }
+
+  data.updateConsultation(consultationId, {
+    consult_date,
+    status: status === "planned" ? "planned" : "completed",
+    content,
+    next_plan: str(formData, "next_plan"),
+  });
+
+  revalidatePath(`/students/${studentId}`);
+  revalidatePath("/");
+}
+
 export async function deleteConsultationAction(
   studentId: number,
   consultationId: number
@@ -132,6 +155,28 @@ export async function createSkillCheckAction(
   revalidatePath(`/students/${studentId}`);
 }
 
+export async function updateSkillCheckAction(
+  studentId: number,
+  skillCheckId: number,
+  formData: FormData
+) {
+  const category = str(formData, "category") as SkillCategory;
+  const level = Number(formData.get("level"));
+  const checked_date = str(formData, "checked_date");
+  if (!category || !checked_date || !level) {
+    throw new Error("카테고리, 날짜, 수준을 입력해주세요.");
+  }
+
+  data.updateSkillCheck(skillCheckId, {
+    category,
+    level,
+    note: str(formData, "note"),
+    checked_date,
+  });
+
+  revalidatePath(`/students/${studentId}`);
+}
+
 export async function deleteSkillCheckAction(
   studentId: number,
   skillCheckId: number
@@ -153,6 +198,29 @@ export async function createWeeklyTestAction(
 
   data.createWeeklyTest({
     student_id: studentId,
+    test_date,
+    test_name: str(formData, "test_name"),
+    score,
+    total_score,
+    note: str(formData, "note"),
+  });
+
+  revalidatePath(`/students/${studentId}`);
+}
+
+export async function updateWeeklyTestAction(
+  studentId: number,
+  weeklyTestId: number,
+  formData: FormData
+) {
+  const test_date = str(formData, "test_date");
+  const score = Number(formData.get("score"));
+  const total_score = Number(formData.get("total_score")) || 100;
+  if (!test_date || Number.isNaN(score)) {
+    throw new Error("날짜와 점수를 입력해주세요.");
+  }
+
+  data.updateWeeklyTest(weeklyTestId, {
     test_date,
     test_name: str(formData, "test_name"),
     score,
@@ -225,10 +293,131 @@ export async function createPaymentAction(
   revalidatePath(`/students/${studentId}`);
 }
 
+export async function updatePaymentAction(
+  studentId: number,
+  paymentId: number,
+  formData: FormData
+) {
+  const paid_date = str(formData, "paid_date");
+  const amount = Number(formData.get("amount"));
+  if (!paid_date || !amount) {
+    throw new Error("결제일과 금액을 입력해주세요.");
+  }
+
+  data.updatePayment(paymentId, {
+    paid_date,
+    amount,
+    period: str(formData, "period"),
+    memo: str(formData, "memo"),
+  });
+
+  revalidatePath(`/students/${studentId}`);
+}
+
 export async function deletePaymentAction(
   studentId: number,
   paymentId: number
 ) {
   data.deletePayment(paymentId);
   revalidatePath(`/students/${studentId}`);
+}
+
+export async function createSchoolExamAction(
+  studentId: number,
+  formData: FormData
+) {
+  const exam_date = str(formData, "exam_date");
+  const score = Number(formData.get("score"));
+  const total_score = Number(formData.get("total_score")) || 100;
+  if (!exam_date || Number.isNaN(score)) {
+    throw new Error("날짜와 점수를 입력해주세요.");
+  }
+
+  data.createSchoolExam({
+    student_id: studentId,
+    exam_date,
+    exam_name: str(formData, "exam_name"),
+    score,
+    total_score,
+    note: str(formData, "note"),
+  });
+
+  revalidatePath(`/students/${studentId}`);
+}
+
+export async function updateSchoolExamAction(
+  studentId: number,
+  examId: number,
+  formData: FormData
+) {
+  const exam_date = str(formData, "exam_date");
+  const score = Number(formData.get("score"));
+  const total_score = Number(formData.get("total_score")) || 100;
+  if (!exam_date || Number.isNaN(score)) {
+    throw new Error("날짜와 점수를 입력해주세요.");
+  }
+
+  data.updateSchoolExam(examId, {
+    exam_date,
+    exam_name: str(formData, "exam_name"),
+    score,
+    total_score,
+    note: str(formData, "note"),
+  });
+
+  revalidatePath(`/students/${studentId}`);
+}
+
+export async function deleteSchoolExamAction(studentId: number, examId: number) {
+  data.deleteSchoolExam(examId);
+  revalidatePath(`/students/${studentId}`);
+}
+
+export async function createMakeupClassAction(
+  studentId: number,
+  formData: FormData
+) {
+  const absence_date = str(formData, "absence_date");
+  if (!absence_date) {
+    throw new Error("결석일을 입력해주세요.");
+  }
+
+  data.createMakeupClass({
+    student_id: studentId,
+    absence_date,
+    makeup_date: str(formData, "makeup_date"),
+    memo: str(formData, "memo"),
+  });
+
+  revalidatePath(`/students/${studentId}`);
+  revalidatePath("/");
+}
+
+export async function updateMakeupClassAction(
+  studentId: number,
+  makeupClassId: number,
+  formData: FormData
+) {
+  const absence_date = str(formData, "absence_date");
+  if (!absence_date) {
+    throw new Error("결석일을 입력해주세요.");
+  }
+
+  data.updateMakeupClass(makeupClassId, {
+    absence_date,
+    makeup_date: str(formData, "makeup_date"),
+    memo: str(formData, "memo"),
+  });
+
+  revalidatePath(`/students/${studentId}`);
+  revalidatePath("/");
+}
+
+export async function deleteMakeupClassAction(
+  studentId: number,
+  makeupClassId: number
+) {
+  data.deleteMakeupClass(makeupClassId);
+  revalidatePath(`/students/${studentId}`);
+  revalidatePath("/");
 }

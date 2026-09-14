@@ -1,11 +1,77 @@
 import { getPayments, getLatestPaymentDate } from "@/lib/data";
-import { createPaymentAction, deletePaymentAction } from "@/lib/actions";
+import {
+  createPaymentAction,
+  updatePaymentAction,
+  deletePaymentAction,
+} from "@/lib/actions";
 import { getNextPaymentDate, getPaymentStatus } from "@/lib/payment";
 import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
+import {
+  EditableItem,
+  EditTrigger,
+  CancelEditButton,
+} from "@/components/EditableItem";
 import { PaymentStatusBadge } from "@/components/PaymentStatusBadge";
+import type { Payment } from "@/lib/types";
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
+}
+
+function PaymentFields({ payment }: { payment?: Payment }) {
+  return (
+    <>
+      <div>
+        <label className="block text-sm font-medium text-neutral-700">
+          결제일 <span className="text-red-500">*</span>
+        </label>
+        <input
+          type="date"
+          name="paid_date"
+          defaultValue={payment?.paid_date ?? todayStr()}
+          required
+          className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-neutral-700">
+          금액 <span className="text-red-500">*</span>
+        </label>
+        <input
+          type="number"
+          step="1000"
+          name="amount"
+          defaultValue={payment?.amount}
+          required
+          placeholder="예: 300000"
+          className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+        />
+      </div>
+      <div className="sm:col-span-2">
+        <label className="block text-sm font-medium text-neutral-700">
+          수강 기간 / 몇월분
+        </label>
+        <input
+          name="period"
+          defaultValue={payment?.period ?? ""}
+          placeholder="예: 2026년 9월"
+          className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+        />
+      </div>
+      <div className="sm:col-span-2">
+        <label className="block text-sm font-medium text-neutral-700">
+          메모
+        </label>
+        <textarea
+          name="memo"
+          rows={2}
+          defaultValue={payment?.memo ?? ""}
+          placeholder="결제 방법, 특이사항 등"
+          className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+        />
+      </div>
+    </>
+  );
 }
 
 export async function PaymentSection({
@@ -63,52 +129,7 @@ export async function PaymentSection({
         action={action}
         className="grid gap-3 rounded-lg border border-neutral-200 bg-white p-4 sm:grid-cols-2"
       >
-        <div>
-          <label className="block text-sm font-medium text-neutral-700">
-            결제일 <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="date"
-            name="paid_date"
-            defaultValue={todayStr()}
-            required
-            className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-neutral-700">
-            금액 <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="number"
-            step="1000"
-            name="amount"
-            required
-            placeholder="예: 300000"
-            className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
-          />
-        </div>
-        <div className="sm:col-span-2">
-          <label className="block text-sm font-medium text-neutral-700">
-            수강 기간 / 몇월분
-          </label>
-          <input
-            name="period"
-            placeholder="예: 2026년 9월"
-            className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
-          />
-        </div>
-        <div className="sm:col-span-2">
-          <label className="block text-sm font-medium text-neutral-700">
-            메모
-          </label>
-          <textarea
-            name="memo"
-            rows={2}
-            placeholder="결제 방법, 특이사항 등"
-            className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
-          />
-        </div>
+        <PaymentFields />
         <div className="sm:col-span-2">
           <button
             type="submit"
@@ -139,21 +160,55 @@ export async function PaymentSection({
               </tr>
             )}
             {payments.map((p) => (
-              <tr key={p.id} className="border-t border-neutral-100">
-                <td className="px-4 py-2 whitespace-nowrap">{p.paid_date}</td>
-                <td className="px-4 py-2 whitespace-nowrap font-medium">
-                  {p.amount.toLocaleString()}원
-                </td>
-                <td className="px-4 py-2">{p.period || "-"}</td>
-                <td className="px-4 py-2 text-neutral-600">{p.memo || "-"}</td>
-                <td className="px-4 py-2 text-right">
-                  <form action={deletePaymentAction.bind(null, studentId, p.id)}>
-                    <ConfirmSubmitButton className="text-xs text-neutral-400 hover:text-red-500">
-                      삭제
-                    </ConfirmSubmitButton>
-                  </form>
-                </td>
-              </tr>
+              <EditableItem
+                key={p.id}
+                view={
+                  <tr className="border-t border-neutral-100">
+                    <td className="px-4 py-2 whitespace-nowrap">{p.paid_date}</td>
+                    <td className="px-4 py-2 whitespace-nowrap font-medium">
+                      {p.amount.toLocaleString()}원
+                    </td>
+                    <td className="px-4 py-2">{p.period || "-"}</td>
+                    <td className="px-4 py-2 text-neutral-600">{p.memo || "-"}</td>
+                    <td className="px-4 py-2 text-right whitespace-nowrap">
+                      <EditTrigger className="mr-2 text-xs text-neutral-400 hover:text-neutral-700">
+                        수정
+                      </EditTrigger>
+                      <form
+                        className="inline"
+                        action={deletePaymentAction.bind(null, studentId, p.id)}
+                      >
+                        <ConfirmSubmitButton className="text-xs text-neutral-400 hover:text-red-500">
+                          삭제
+                        </ConfirmSubmitButton>
+                      </form>
+                    </td>
+                  </tr>
+                }
+                editForm={
+                  <tr className="border-t border-neutral-100 bg-neutral-50">
+                    <td colSpan={5} className="p-4">
+                      <form
+                        action={updatePaymentAction.bind(null, studentId, p.id)}
+                        className="grid gap-3 sm:grid-cols-2"
+                      >
+                        <PaymentFields payment={p} />
+                        <div className="flex gap-2 sm:col-span-2">
+                          <button
+                            type="submit"
+                            className="rounded-md bg-neutral-800 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700"
+                          >
+                            저장
+                          </button>
+                          <CancelEditButton className="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100">
+                            취소
+                          </CancelEditButton>
+                        </div>
+                      </form>
+                    </td>
+                  </tr>
+                }
+              />
             ))}
           </tbody>
         </table>

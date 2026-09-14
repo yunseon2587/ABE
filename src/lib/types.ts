@@ -95,3 +95,25 @@ export type Payment = {
   memo: string | null;
   created_at: string;
 };
+
+// 학원 자체 테스트(WeeklyTest)와 별개로, 실제 학교에서 본 시험 성적.
+export type SchoolExam = {
+  id: number;
+  student_id: number;
+  exam_date: string;
+  exam_name: string | null;
+  score: number;
+  total_score: number;
+  note: string | null;
+  created_at: string;
+};
+
+// 결석/보강 기록. makeup_date가 비어 있으면 보강 일정이 아직 미정인 상태.
+export type MakeupClass = {
+  id: number;
+  student_id: number;
+  absence_date: string;
+  makeup_date: string | null;
+  memo: string | null;
+  created_at: string;
+};

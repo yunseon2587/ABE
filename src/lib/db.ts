@@ -89,10 +89,33 @@ db.exec(`
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
+  CREATE TABLE IF NOT EXISTS school_exams (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+    exam_date TEXT NOT NULL,
+    exam_name TEXT,
+    score REAL NOT NULL,
+    total_score REAL NOT NULL DEFAULT 100,
+    note TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS makeup_classes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+    absence_date TEXT NOT NULL,
+    makeup_date TEXT,
+    memo TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
   CREATE INDEX IF NOT EXISTS idx_consultations_student ON consultations(student_id);
   CREATE INDEX IF NOT EXISTS idx_skill_checks_student ON skill_checks(student_id);
   CREATE INDEX IF NOT EXISTS idx_weekly_tests_student ON weekly_tests(student_id);
   CREATE INDEX IF NOT EXISTS idx_payments_student ON payments(student_id);
+  CREATE INDEX IF NOT EXISTS idx_school_exams_student ON school_exams(student_id);
+  CREATE INDEX IF NOT EXISTS idx_makeup_classes_student ON makeup_classes(student_id);
+  CREATE INDEX IF NOT EXISTS idx_makeup_classes_makeup_date ON makeup_classes(makeup_date);
 `);
 
 // students 테이블이 gender/payment_day 컬럼 없이 먼저 만들어졌던 기존 DB를 위한 마이그레이션.
