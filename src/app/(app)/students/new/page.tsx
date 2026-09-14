@@ -1,5 +1,6 @@
 import { createStudentAction } from "@/lib/actions";
 import { GENDER_OPTIONS } from "@/lib/types";
+import { PhoneInput } from "@/components/PhoneInput";
 
 type SearchParams = {
   prospectId?: string;
@@ -105,9 +106,9 @@ export default async function NewStudentPage({
             <label className="block text-sm font-medium text-neutral-700">
               학생 연락처
             </label>
-            <input
+            <PhoneInput
               name="phone"
-              defaultValue={sp.phone ?? ""}
+              defaultValue={sp.phone}
               className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
             />
           </div>
@@ -115,9 +116,9 @@ export default async function NewStudentPage({
             <label className="block text-sm font-medium text-neutral-700">
               학부모 연락처
             </label>
-            <input
+            <PhoneInput
               name="parent_phone"
-              defaultValue={sp.parent_phone ?? ""}
+              defaultValue={sp.parent_phone}
               className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
             />
           </div>

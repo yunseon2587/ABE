@@ -4,6 +4,7 @@ import {
   getUpcomingConsultations,
   getProspects,
   getLatestPaymentDatesByStudent,
+  getMakeupClassesInRange,
 } from "@/lib/data";
 import { UNGROUPED_GRADE_LABEL, compareGrades } from "@/lib/grade";
 import { getPaymentStatus } from "@/lib/payment";
@@ -13,6 +14,8 @@ import {
   deleteProspectAction,
 } from "@/lib/actions";
 import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
+import { PhoneInput } from "@/components/PhoneInput";
+import { MakeupCalendar } from "@/components/MakeupCalendar";
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
@@ -59,6 +62,13 @@ export default function HomePage() {
     }))
     .filter((x) => x.status.status === "overdue")
     .sort((a, b) => b.status.overdueDays - a.status.overdueDays);
+
+  const now = new Date();
+  const calendarYear = now.getFullYear();
+  const calendarMonth = now.getMonth() + 1;
+  const monthStart = `${calendarYear}-${String(calendarMonth).padStart(2, "0")}-01`;
+  const monthEnd = `${calendarYear}-${String(calendarMonth).padStart(2, "0")}-31`;
+  const makeupItems = getMakeupClassesInRange(monthStart, monthEnd);
 
   type UpcomingItem =
     | {
@@ -158,6 +168,8 @@ export default function HomePage() {
           </ul>
         </section>
       )}
+
+      <MakeupCalendar year={calendarYear} month={calendarMonth} items={makeupItems} />
 
       <section className="rounded-lg border border-neutral-200 bg-white p-5">
         <h2 className="text-lg font-semibold">다가오는 상담 예정</h2>
@@ -327,7 +339,7 @@ export default function HomePage() {
             <label className="block text-sm font-medium text-neutral-700">
               학생 연락처
             </label>
-            <input
+            <PhoneInput
               name="phone"
               className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
             />
@@ -336,7 +348,7 @@ export default function HomePage() {
             <label className="block text-sm font-medium text-neutral-700">
               학부모 연락처
             </label>
-            <input
+            <PhoneInput
               name="parent_phone"
               className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
             />
