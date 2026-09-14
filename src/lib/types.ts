@@ -21,6 +21,22 @@ export type Consultation = {
   created_at: string;
 };
 
+export type ProspectStatus = "planned" | "done";
+
+// 아직 정식 학생으로 등록하지 않은, 상담 예정/진행 중인 문의자.
+export type Prospect = {
+  id: number;
+  name: string;
+  grade: string | null;
+  school: string | null;
+  phone: string | null;
+  parent_phone: string | null;
+  consult_date: string;
+  status: ProspectStatus;
+  memo: string | null;
+  created_at: string;
+};
+
 export const SKILL_CATEGORIES = [
   { key: "grammar", label: "문법" },
   { key: "writing", label: "작문" },

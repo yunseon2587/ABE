@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import * as data from "./data";
-import type { ConsultationStatus, SkillCategory } from "./types";
+import type { ConsultationStatus, ProspectStatus, SkillCategory } from "./types";
 
 function str(fd: FormData, key: string): string {
   return (fd.get(key) as string | null)?.trim() ?? "";
@@ -21,6 +21,12 @@ export async function createStudentAction(formData: FormData) {
     parent_phone: str(formData, "parent_phone"),
     memo: str(formData, "memo"),
   });
+
+  // 상담 예정/완료 문의자를 정식 학생으로 등록 전환하는 경우, 문의자 기록은 정리한다.
+  const prospectId = Number(formData.get("prospect_id"));
+  if (prospectId) {
+    data.deleteProspect(prospectId);
+  }
 
   revalidatePath("/", "layout");
   redirect(`/students/${id}`);
@@ -143,4 +149,37 @@ export async function deleteWeeklyTestAction(
 ) {
   data.deleteWeeklyTest(weeklyTestId);
   revalidatePath(`/students/${studentId}`);
+}
+
+export async function createProspectAction(formData: FormData) {
+  const name = str(formData, "name");
+  const consult_date = str(formData, "consult_date");
+  if (!name || !consult_date) {
+    throw new Error("이름과 상담 예정일을 입력해주세요.");
+  }
+
+  data.createProspect({
+    name,
+    grade: str(formData, "grade"),
+    school: str(formData, "school"),
+    phone: str(formData, "phone"),
+    parent_phone: str(formData, "parent_phone"),
+    consult_date,
+    memo: str(formData, "memo"),
+  });
+
+  revalidatePath("/");
+}
+
+export async function setProspectStatusAction(
+  prospectId: number,
+  status: ProspectStatus
+) {
+  data.updateProspectStatus(prospectId, status);
+  revalidatePath("/");
+}
+
+export async function deleteProspectAction(prospectId: number) {
+  data.deleteProspect(prospectId);
+  revalidatePath("/");
 }

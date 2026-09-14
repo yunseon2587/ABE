@@ -6,6 +6,8 @@ import type {
   WeeklyTest,
   ConsultationStatus,
   SkillCategory,
+  Prospect,
+  ProspectStatus,
 } from "./types";
 
 // ---- Students ----
@@ -210,4 +212,56 @@ export function createWeeklyTest(input: {
 
 export function deleteWeeklyTest(id: number): void {
   db.prepare(`DELETE FROM weekly_tests WHERE id = ?`).run(id);
+}
+
+// ---- Prospects (아직 정식 등록 전, 상담 예정/완료 문의자) ----
+
+export function getProspects(status?: ProspectStatus): Prospect[] {
+  if (status) {
+    return db
+      .prepare(
+        `SELECT * FROM prospects WHERE status = ? ORDER BY consult_date ASC, id ASC`
+      )
+      .all(status) as Prospect[];
+  }
+  return db
+    .prepare(`SELECT * FROM prospects ORDER BY consult_date ASC, id ASC`)
+    .all() as Prospect[];
+}
+
+export function getProspect(id: number): Prospect | undefined {
+  return db.prepare(`SELECT * FROM prospects WHERE id = ?`).get(id) as
+    | Prospect
+    | undefined;
+}
+
+export function createProspect(input: {
+  name: string;
+  grade?: string;
+  school?: string;
+  phone?: string;
+  parent_phone?: string;
+  consult_date: string;
+  memo?: string;
+}): void {
+  db.prepare(
+    `INSERT INTO prospects (name, grade, school, phone, parent_phone, consult_date, memo)
+     VALUES (@name, @grade, @school, @phone, @parent_phone, @consult_date, @memo)`
+  ).run({
+    name: input.name,
+    grade: input.grade || null,
+    school: input.school || null,
+    phone: input.phone || null,
+    parent_phone: input.parent_phone || null,
+    consult_date: input.consult_date,
+    memo: input.memo || null,
+  });
+}
+
+export function updateProspectStatus(id: number, status: ProspectStatus): void {
+  db.prepare(`UPDATE prospects SET status = ? WHERE id = ?`).run(status, id);
+}
+
+export function deleteProspect(id: number): void {
+  db.prepare(`DELETE FROM prospects WHERE id = ?`).run(id);
 }

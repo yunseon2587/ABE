@@ -64,6 +64,19 @@ db.exec(`
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
+  CREATE TABLE IF NOT EXISTS prospects (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    grade TEXT,
+    school TEXT,
+    phone TEXT,
+    parent_phone TEXT,
+    consult_date TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'planned', -- planned | done
+    memo TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
   CREATE INDEX IF NOT EXISTS idx_consultations_student ON consultations(student_id);
   CREATE INDEX IF NOT EXISTS idx_skill_checks_student ON skill_checks(student_id);
   CREATE INDEX IF NOT EXISTS idx_weekly_tests_student ON weekly_tests(student_id);
