@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { getStudents } from "@/lib/data";
+import { getStudents, getLatestPaymentDatesByStudent } from "@/lib/data";
+import { getPaymentStatus } from "@/lib/payment";
 import { Sidebar } from "@/components/Sidebar";
 
 // 사이드바가 매 요청마다 최신 학생 목록을 SQLite에서 직접 읽으므로,
@@ -7,10 +8,14 @@ import { Sidebar } from "@/components/Sidebar";
 export const dynamic = "force-dynamic";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
+  const latestPaymentDates = getLatestPaymentDatesByStudent();
   const students = getStudents().map((s) => ({
     id: s.id,
     name: s.name,
     grade: s.grade,
+    overdue:
+      getPaymentStatus(s.payment_day, latestPaymentDates[s.id] ?? null)
+        .status === "overdue",
   }));
 
   return (

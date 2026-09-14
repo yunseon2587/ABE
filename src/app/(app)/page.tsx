@@ -3,8 +3,10 @@ import {
   getStudents,
   getUpcomingConsultations,
   getProspects,
+  getLatestPaymentDatesByStudent,
 } from "@/lib/data";
 import { UNGROUPED_GRADE_LABEL, compareGrades } from "@/lib/grade";
+import { getPaymentStatus } from "@/lib/payment";
 import {
   createProspectAction,
   setProspectStatusAction,
@@ -48,6 +50,15 @@ export default function HomePage() {
   const sortedGradeCounts = Array.from(gradeCounts.entries()).sort((a, b) =>
     compareGrades(a[0], b[0])
   );
+
+  const latestPaymentDates = getLatestPaymentDatesByStudent();
+  const overdueStudents = students
+    .map((s) => ({
+      student: s,
+      status: getPaymentStatus(s.payment_day, latestPaymentDates[s.id] ?? null),
+    }))
+    .filter((x) => x.status.status === "overdue")
+    .sort((a, b) => b.status.overdueDays - a.status.overdueDays);
 
   type UpcomingItem =
     | {
@@ -118,6 +129,35 @@ export default function HomePage() {
           )}
         </div>
       </section>
+
+      {overdueStudents.length > 0 && (
+        <section className="rounded-lg border border-red-200 bg-red-50 p-5">
+          <h2 className="text-lg font-semibold text-red-900">
+            결제 미납 · 연체 학생 ({overdueStudents.length}명)
+          </h2>
+          <ul className="mt-3 divide-y divide-red-100">
+            {overdueStudents.map(({ student: s, status }) => (
+              <li
+                key={s.id}
+                className="flex flex-wrap items-center justify-between gap-2 py-2"
+              >
+                <Link
+                  href={`/students/${s.id}`}
+                  className="font-medium text-neutral-800 hover:underline"
+                >
+                  {s.name}
+                </Link>
+                <span className="rounded bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">
+                  {status.overdueDays > 0
+                    ? `연체 ${status.overdueDays}일째`
+                    : "결제일 (오늘)"}
+                  {status.dueDate && ` · 결제일 ${status.dueDate}`}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="rounded-lg border border-neutral-200 bg-white p-5">
         <h2 className="text-lg font-semibold">다가오는 상담 예정</h2>

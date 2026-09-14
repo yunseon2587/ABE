@@ -1,7 +1,8 @@
-import { getPayments } from "@/lib/data";
+import { getPayments, getLatestPaymentDate } from "@/lib/data";
 import { createPaymentAction, deletePaymentAction } from "@/lib/actions";
-import { getNextPaymentDate } from "@/lib/payment";
+import { getNextPaymentDate, getPaymentStatus } from "@/lib/payment";
 import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
+import { PaymentStatusBadge } from "@/components/PaymentStatusBadge";
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
@@ -17,10 +18,12 @@ export async function PaymentSection({
   const payments = getPayments(studentId);
   const action = createPaymentAction.bind(null, studentId);
   const nextDue = paymentDay ? getNextPaymentDate(paymentDay) : null;
+  const lastPaidDate = getLatestPaymentDate(studentId);
+  const paymentStatus = getPaymentStatus(paymentDay, lastPaidDate);
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-3">
         <div className="rounded-lg border border-neutral-200 bg-white p-4">
           <div className="text-xs font-medium text-neutral-500">결제일</div>
           <div className="mt-1 text-lg font-semibold">
@@ -31,6 +34,22 @@ export async function PaymentSection({
               위 &quot;학생 정보 수정&quot;에서 결제일을 등록해보세요.
             </p>
           )}
+        </div>
+        <div
+          className={`rounded-lg border p-4 ${
+            paymentStatus.status === "overdue"
+              ? "border-red-200 bg-red-50"
+              : "border-neutral-200 bg-white"
+          }`}
+        >
+          <div className="text-xs font-medium text-neutral-500">납부 상태</div>
+          <div className="mt-1">
+            {paymentStatus.status === "no_schedule" ? (
+              <span className="text-sm text-neutral-400">-</span>
+            ) : (
+              <PaymentStatusBadge status={paymentStatus} />
+            )}
+          </div>
         </div>
         <div className="rounded-lg border border-pink-200 bg-pink-50 p-4">
           <div className="text-xs font-medium text-pink-900">다음 결제 예정일</div>

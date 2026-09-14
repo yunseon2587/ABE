@@ -308,3 +308,27 @@ export function createPayment(input: {
 export function deletePayment(id: number): void {
   db.prepare(`DELETE FROM payments WHERE id = ?`).run(id);
 }
+
+export function getLatestPaymentDate(studentId: number): string | null {
+  const row = db
+    .prepare(
+      `SELECT MAX(paid_date) AS last_paid FROM payments WHERE student_id = ?`
+    )
+    .get(studentId) as { last_paid: string | null };
+  return row?.last_paid ?? null;
+}
+
+// 학생 id별 가장 최근 결제일. 사이드바/대시보드에서 여러 학생의 연체 여부를
+// 한 번에 계산할 때 학생 수만큼 쿼리하지 않도록 한 번의 쿼리로 가져온다.
+export function getLatestPaymentDatesByStudent(): Record<number, string> {
+  const rows = db
+    .prepare(
+      `SELECT student_id, MAX(paid_date) AS last_paid FROM payments GROUP BY student_id`
+    )
+    .all() as { student_id: number; last_paid: string }[];
+  const map: Record<number, string> = {};
+  for (const row of rows) {
+    map[row.student_id] = row.last_paid;
+  }
+  return map;
+}

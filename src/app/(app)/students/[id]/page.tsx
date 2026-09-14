@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
-import { getStudent } from "@/lib/data";
+import { getStudent, getLatestPaymentDate } from "@/lib/data";
 import { updateStudentAction, deleteStudentAction } from "@/lib/actions";
 import { GENDER_OPTIONS } from "@/lib/types";
+import { getPaymentStatus } from "@/lib/payment";
 import { Tabs } from "@/components/Tabs";
 import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
+import { PaymentStatusBadge } from "@/components/PaymentStatusBadge";
 import { ConsultationSection } from "./ConsultationSection";
 import { SkillCheckSection } from "./SkillCheckSection";
 import { WeeklyTestSection } from "./WeeklyTestSection";
@@ -22,6 +24,10 @@ export default async function StudentPage({
   const updateAction = updateStudentAction.bind(null, studentId);
   const deleteAction = deleteStudentAction.bind(null, studentId);
   const genderLabel = GENDER_OPTIONS.find((g) => g.value === student.gender)?.label;
+  const paymentStatus = getPaymentStatus(
+    student.payment_day,
+    getLatestPaymentDate(studentId)
+  );
 
   return (
     <div className="space-y-6">
@@ -29,7 +35,10 @@ export default async function StudentPage({
         <summary className="cursor-pointer list-none p-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h1 className="text-2xl font-bold">{student.name}</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-bold">{student.name}</h1>
+                <PaymentStatusBadge status={paymentStatus} />
+              </div>
               <p className="mt-1 text-sm text-neutral-500">
                 {[genderLabel, student.grade, student.school]
                   .filter(Boolean)
