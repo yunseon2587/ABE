@@ -1,4 +1,5 @@
 import { createStudentAction } from "@/lib/actions";
+import { GENDER_OPTIONS } from "@/lib/types";
 
 type SearchParams = {
   prospectId?: string;
@@ -67,6 +68,36 @@ export default async function NewStudentPage({
             <input
               name="school"
               defaultValue={sp.school ?? ""}
+              className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-neutral-700">
+              성별
+            </label>
+            <select
+              name="gender"
+              defaultValue=""
+              className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+            >
+              <option value="">선택 안함</option>
+              {GENDER_OPTIONS.map((g) => (
+                <option key={g.value} value={g.value}>
+                  {g.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-neutral-700">
+              결제일
+            </label>
+            <input
+              type="number"
+              name="payment_day"
+              min={1}
+              max={31}
+              placeholder="예: 15 (매월)"
               className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
             />
           </div>

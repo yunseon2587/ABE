@@ -29,6 +29,8 @@ db.exec(`
     school TEXT,
     phone TEXT,
     parent_phone TEXT,
+    gender TEXT,
+    payment_day INTEGER,
     memo TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
@@ -77,9 +79,32 @@ db.exec(`
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
+  CREATE TABLE IF NOT EXISTS payments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+    paid_date TEXT NOT NULL,
+    amount REAL NOT NULL,
+    period TEXT,
+    memo TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
   CREATE INDEX IF NOT EXISTS idx_consultations_student ON consultations(student_id);
   CREATE INDEX IF NOT EXISTS idx_skill_checks_student ON skill_checks(student_id);
   CREATE INDEX IF NOT EXISTS idx_weekly_tests_student ON weekly_tests(student_id);
+  CREATE INDEX IF NOT EXISTS idx_payments_student ON payments(student_id);
 `);
+
+// students 테이블이 gender/payment_day 컬럼 없이 먼저 만들어졌던 기존 DB를 위한 마이그레이션.
+function ensureColumn(table: string, column: string, definition: string) {
+  const columns = db.prepare(`PRAGMA table_info(${table})`).all() as {
+    name: string;
+  }[];
+  if (!columns.some((c) => c.name === column)) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  }
+}
+ensureColumn("students", "gender", "TEXT");
+ensureColumn("students", "payment_day", "INTEGER");
 
 export default db;

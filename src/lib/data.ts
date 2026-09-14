@@ -8,6 +8,8 @@ import type {
   SkillCategory,
   Prospect,
   ProspectStatus,
+  Gender,
+  Payment,
 } from "./types";
 
 // ---- Students ----
@@ -53,12 +55,14 @@ export function createStudent(input: {
   school?: string;
   phone?: string;
   parent_phone?: string;
+  gender?: Gender | "";
+  payment_day?: number | null;
   memo?: string;
 }): number {
   const result = db
     .prepare(
-      `INSERT INTO students (name, grade, school, phone, parent_phone, memo)
-       VALUES (@name, @grade, @school, @phone, @parent_phone, @memo)`
+      `INSERT INTO students (name, grade, school, phone, parent_phone, gender, payment_day, memo)
+       VALUES (@name, @grade, @school, @phone, @parent_phone, @gender, @payment_day, @memo)`
     )
     .run({
       name: input.name,
@@ -66,6 +70,8 @@ export function createStudent(input: {
       school: input.school || null,
       phone: input.phone || null,
       parent_phone: input.parent_phone || null,
+      gender: input.gender || null,
+      payment_day: input.payment_day || null,
       memo: input.memo || null,
     });
   return Number(result.lastInsertRowid);
@@ -79,12 +85,14 @@ export function updateStudent(
     school?: string;
     phone?: string;
     parent_phone?: string;
+    gender?: Gender | "";
+    payment_day?: number | null;
     memo?: string;
   }
 ): void {
   db.prepare(
     `UPDATE students SET name=@name, grade=@grade, school=@school, phone=@phone,
-     parent_phone=@parent_phone, memo=@memo WHERE id=@id`
+     parent_phone=@parent_phone, gender=@gender, payment_day=@payment_day, memo=@memo WHERE id=@id`
   ).run({
     id,
     name: input.name,
@@ -92,6 +100,8 @@ export function updateStudent(
     school: input.school || null,
     phone: input.phone || null,
     parent_phone: input.parent_phone || null,
+    gender: input.gender || null,
+    payment_day: input.payment_day || null,
     memo: input.memo || null,
   });
 }
@@ -264,4 +274,37 @@ export function updateProspectStatus(id: number, status: ProspectStatus): void {
 
 export function deleteProspect(id: number): void {
   db.prepare(`DELETE FROM prospects WHERE id = ?`).run(id);
+}
+
+// ---- Payments ----
+
+export function getPayments(studentId: number): Payment[] {
+  return db
+    .prepare(
+      `SELECT * FROM payments WHERE student_id = ? ORDER BY paid_date DESC, id DESC`
+    )
+    .all(studentId) as Payment[];
+}
+
+export function createPayment(input: {
+  student_id: number;
+  paid_date: string;
+  amount: number;
+  period?: string;
+  memo?: string;
+}): void {
+  db.prepare(
+    `INSERT INTO payments (student_id, paid_date, amount, period, memo)
+     VALUES (@student_id, @paid_date, @amount, @period, @memo)`
+  ).run({
+    student_id: input.student_id,
+    paid_date: input.paid_date,
+    amount: input.amount,
+    period: input.period || null,
+    memo: input.memo || null,
+  });
+}
+
+export function deletePayment(id: number): void {
+  db.prepare(`DELETE FROM payments WHERE id = ?`).run(id);
 }

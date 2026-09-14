@@ -3,10 +3,26 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import * as data from "./data";
-import type { ConsultationStatus, ProspectStatus, SkillCategory } from "./types";
+import type {
+  ConsultationStatus,
+  Gender,
+  ProspectStatus,
+  SkillCategory,
+} from "./types";
+import { GENDER_OPTIONS } from "./types";
 
 function str(fd: FormData, key: string): string {
   return (fd.get(key) as string | null)?.trim() ?? "";
+}
+
+function parseGender(fd: FormData): Gender | "" {
+  const value = str(fd, "gender");
+  return GENDER_OPTIONS.some((g) => g.value === value) ? (value as Gender) : "";
+}
+
+function parsePaymentDay(fd: FormData): number | null {
+  const value = Number(fd.get("payment_day"));
+  return Number.isInteger(value) && value >= 1 && value <= 31 ? value : null;
 }
 
 export async function createStudentAction(formData: FormData) {
@@ -19,6 +35,8 @@ export async function createStudentAction(formData: FormData) {
     school: str(formData, "school"),
     phone: str(formData, "phone"),
     parent_phone: str(formData, "parent_phone"),
+    gender: parseGender(formData),
+    payment_day: parsePaymentDay(formData),
     memo: str(formData, "memo"),
   });
 
@@ -45,6 +63,8 @@ export async function updateStudentAction(
     school: str(formData, "school"),
     phone: str(formData, "phone"),
     parent_phone: str(formData, "parent_phone"),
+    gender: parseGender(formData),
+    payment_day: parsePaymentDay(formData),
     memo: str(formData, "memo"),
   });
 
@@ -182,4 +202,33 @@ export async function setProspectStatusAction(
 export async function deleteProspectAction(prospectId: number) {
   data.deleteProspect(prospectId);
   revalidatePath("/");
+}
+
+export async function createPaymentAction(
+  studentId: number,
+  formData: FormData
+) {
+  const paid_date = str(formData, "paid_date");
+  const amount = Number(formData.get("amount"));
+  if (!paid_date || !amount) {
+    throw new Error("결제일과 금액을 입력해주세요.");
+  }
+
+  data.createPayment({
+    student_id: studentId,
+    paid_date,
+    amount,
+    period: str(formData, "period"),
+    memo: str(formData, "memo"),
+  });
+
+  revalidatePath(`/students/${studentId}`);
+}
+
+export async function deletePaymentAction(
+  studentId: number,
+  paymentId: number
+) {
+  data.deletePayment(paymentId);
+  revalidatePath(`/students/${studentId}`);
 }
