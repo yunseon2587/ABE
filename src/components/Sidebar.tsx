@@ -11,6 +11,7 @@ type SidebarStudent = {
   id: number;
   name: string;
   grade: string | null;
+  overdue: boolean;
 };
 
 export function Sidebar({ students }: { students: SidebarStudent[] }) {
@@ -112,13 +113,19 @@ export function Sidebar({ students }: { students: SidebarStudent[] }) {
                           <li key={s.id}>
                             <Link
                               href={`/students/${s.id}`}
-                              className={`block rounded px-3 py-1.5 text-sm transition ${
+                              className={`flex items-center justify-between rounded px-3 py-1.5 text-sm transition ${
                                 active
                                   ? "bg-pink-300 font-semibold text-neutral-900"
                                   : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
                               }`}
                             >
                               {s.name}
+                              {s.overdue && (
+                                <span
+                                  title="결제 연체"
+                                  className="h-1.5 w-1.5 shrink-0 rounded-full bg-red-500"
+                                />
+                              )}
                             </Link>
                           </li>
                         );

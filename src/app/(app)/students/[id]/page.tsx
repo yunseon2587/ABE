@@ -1,11 +1,15 @@
 import { notFound } from "next/navigation";
-import { getStudent } from "@/lib/data";
+import { getStudent, getLatestPaymentDate } from "@/lib/data";
 import { updateStudentAction, deleteStudentAction } from "@/lib/actions";
+import { GENDER_OPTIONS } from "@/lib/types";
+import { getPaymentStatus } from "@/lib/payment";
 import { Tabs } from "@/components/Tabs";
 import { ConfirmSubmitButton } from "@/components/ConfirmSubmitButton";
+import { PaymentStatusBadge } from "@/components/PaymentStatusBadge";
 import { ConsultationSection } from "./ConsultationSection";
 import { SkillCheckSection } from "./SkillCheckSection";
 import { WeeklyTestSection } from "./WeeklyTestSection";
+import { PaymentSection } from "./PaymentSection";
 
 export default async function StudentPage({
   params,
@@ -19,6 +23,11 @@ export default async function StudentPage({
 
   const updateAction = updateStudentAction.bind(null, studentId);
   const deleteAction = deleteStudentAction.bind(null, studentId);
+  const genderLabel = GENDER_OPTIONS.find((g) => g.value === student.gender)?.label;
+  const paymentStatus = getPaymentStatus(
+    student.payment_day,
+    getLatestPaymentDate(studentId)
+  );
 
   return (
     <div className="space-y-6">
@@ -26,12 +35,17 @@ export default async function StudentPage({
         <summary className="cursor-pointer list-none p-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h1 className="text-2xl font-bold">{student.name}</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-bold">{student.name}</h1>
+                <PaymentStatusBadge status={paymentStatus} />
+              </div>
               <p className="mt-1 text-sm text-neutral-500">
-                {[student.grade, student.school].filter(Boolean).join(" · ") ||
-                  "정보 없음"}
+                {[genderLabel, student.grade, student.school]
+                  .filter(Boolean)
+                  .join(" · ") || "정보 없음"}
                 {student.phone && ` · 학생 ${student.phone}`}
                 {student.parent_phone && ` · 학부모 ${student.parent_phone}`}
+                {student.payment_day && ` · 매월 ${student.payment_day}일 결제`}
               </p>
             </div>
             <span className="text-xs text-neutral-400">학생 정보 수정 ▾</span>
@@ -67,6 +81,37 @@ export default async function StudentPage({
               <input
                 name="school"
                 defaultValue={student.school ?? ""}
+                className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-700">
+                성별
+              </label>
+              <select
+                name="gender"
+                defaultValue={student.gender ?? ""}
+                className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+              >
+                <option value="">선택 안함</option>
+                {GENDER_OPTIONS.map((g) => (
+                  <option key={g.value} value={g.value}>
+                    {g.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-700">
+                결제일
+              </label>
+              <input
+                type="number"
+                name="payment_day"
+                min={1}
+                max={31}
+                placeholder="예: 15 (매월)"
+                defaultValue={student.payment_day ?? ""}
                 className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
               />
             </div>
@@ -137,6 +182,13 @@ export default async function StudentPage({
             key: "tests",
             label: "주간 테스트",
             content: <WeeklyTestSection studentId={studentId} />,
+          },
+          {
+            key: "payments",
+            label: "결제 관리",
+            content: (
+              <PaymentSection studentId={studentId} paymentDay={student.payment_day} />
+            ),
           },
         ]}
       />

@@ -1,3 +1,10 @@
+export const GENDER_OPTIONS = [
+  { value: "male", label: "남" },
+  { value: "female", label: "여" },
+] as const;
+
+export type Gender = (typeof GENDER_OPTIONS)[number]["value"];
+
 export type Student = {
   id: number;
   name: string;
@@ -5,6 +12,8 @@ export type Student = {
   school: string | null;
   phone: string | null;
   parent_phone: string | null;
+  gender: Gender | null;
+  payment_day: number | null;
   memo: string | null;
   created_at: string;
 };
@@ -18,6 +27,22 @@ export type Consultation = {
   status: ConsultationStatus;
   content: string;
   next_plan: string | null;
+  created_at: string;
+};
+
+export type ProspectStatus = "planned" | "done";
+
+// 아직 정식 학생으로 등록하지 않은, 상담 예정/진행 중인 문의자.
+export type Prospect = {
+  id: number;
+  name: string;
+  grade: string | null;
+  school: string | null;
+  phone: string | null;
+  parent_phone: string | null;
+  consult_date: string;
+  status: ProspectStatus;
+  memo: string | null;
   created_at: string;
 };
 
@@ -58,5 +83,15 @@ export type WeeklyTest = {
   score: number;
   total_score: number;
   note: string | null;
+  created_at: string;
+};
+
+export type Payment = {
+  id: number;
+  student_id: number;
+  paid_date: string;
+  amount: number;
+  period: string | null;
+  memo: string | null;
   created_at: string;
 };
