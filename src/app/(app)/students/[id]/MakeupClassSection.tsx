@@ -61,7 +61,7 @@ function MakeupFields({ item }: { item?: MakeupClass }) {
 }
 
 export async function MakeupClassSection({ studentId }: { studentId: number }) {
-  const items = getMakeupClasses(studentId);
+  const items = await getMakeupClasses(studentId);
   const createAction = createMakeupClassAction.bind(null, studentId);
   const today = todayStr();
 

@@ -88,7 +88,7 @@ export async function WeeklyTestSection({
 }: {
   studentId: number;
 }) {
-  const tests = getWeeklyTests(studentId);
+  const tests = await getWeeklyTests(studentId);
   const createAction = createWeeklyTestAction.bind(null, studentId);
 
   const avg =

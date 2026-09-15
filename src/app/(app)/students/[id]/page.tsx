@@ -21,7 +21,7 @@ export default async function StudentPage({
 }) {
   const { id } = await params;
   const studentId = Number(id);
-  const student = getStudent(studentId);
+  const student = await getStudent(studentId);
   if (!student) notFound();
 
   const updateAction = updateStudentAction.bind(null, studentId);
@@ -29,7 +29,7 @@ export default async function StudentPage({
   const genderLabel = GENDER_OPTIONS.find((g) => g.value === student.gender)?.label;
   const paymentStatus = getPaymentStatus(
     student.payment_day,
-    getLatestPaymentDate(studentId)
+    await getLatestPaymentDate(studentId)
   );
 
   return (

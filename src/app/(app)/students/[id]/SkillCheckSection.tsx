@@ -89,8 +89,8 @@ export async function SkillCheckSection({
 }: {
   studentId: number;
 }) {
-  const checks = getSkillChecks(studentId);
-  const latest = getLatestSkillLevels(studentId);
+  const checks = await getSkillChecks(studentId);
+  const latest = await getLatestSkillLevels(studentId);
   const action = createSkillCheckAction.bind(null, studentId);
 
   const latestLevels: Partial<Record<SkillCategory, number>> = {};

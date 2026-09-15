@@ -81,10 +81,10 @@ export async function PaymentSection({
   studentId: number;
   paymentDay: number | null;
 }) {
-  const payments = getPayments(studentId);
+  const payments = await getPayments(studentId);
   const action = createPaymentAction.bind(null, studentId);
   const nextDue = paymentDay ? getNextPaymentDate(paymentDay) : null;
-  const lastPaidDate = getLatestPaymentDate(studentId);
+  const lastPaidDate = await getLatestPaymentDate(studentId);
   const paymentStatus = getPaymentStatus(paymentDay, lastPaidDate);
 
   return (

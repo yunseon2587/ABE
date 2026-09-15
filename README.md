@@ -22,7 +22,7 @@
 
 - [Next.js](https://nextjs.org) (App Router, Server Actions, Proxy)
 - TypeScript, Tailwind CSS
-- SQLite (`better-sqlite3`) — 별도 DB 서버 없이 로컬 파일(`data/academy.db`)에 저장
+- SQLite 호환 DB (`@libsql/client`) — 로컬 개발 시에는 로컬 파일(`data/academy.db`), 배포 시에는 [Turso](https://turso.tech)(무료 호스팅 SQLite)에 연결. 코드는 동일하고 환경 변수만 다릅니다.
 
 ## 시작하기
 
@@ -51,9 +51,58 @@ npm run build
 npm start
 ```
 
+## Vercel + Turso로 무료 배포하기
+
+Vercel은 요청마다 서버가 새로 뜨는 서버리스 방식이라 로컬 파일에 저장하는 방식이 안 맞습니다. 그래서 데이터는 [Turso](https://turso.tech)(무료 티어가 있는 SQLite 호환 클라우드 DB)에 저장하고, 앱 자체만 Vercel에 올립니다.
+
+### 1. Turso 데이터베이스 만들기
+
+```bash
+# Turso CLI 설치
+curl -sSfL https://get.tur.so/install.sh | bash
+
+# 계정 생성/로그인 (브라우저가 열립니다)
+turso auth signup
+
+# 데이터베이스 생성 (이름은 원하는 대로)
+turso db create abe-academy
+
+# 연결 주소 확인 (libsql://... 형태)
+turso db show abe-academy --url
+
+# 인증 토큰 발급
+turso db tokens create abe-academy
+```
+
+`turso db show ... --url`로 나온 값은 `TURSO_DATABASE_URL`에, `turso db tokens create`로 나온 토큰은 `TURSO_AUTH_TOKEN`에 사용합니다. (CLI 설치가 부담스러우면 [turso.tech](https://turso.tech) 웹사이트에서 가입 후 대시보드로 데이터베이스를 만들어도 동일합니다.)
+
+### 2. GitHub에 코드 올리기
+
+```bash
+git push origin main
+```
+
+### 3. Vercel에 배포
+
+1. [vercel.com](https://vercel.com)에서 GitHub 계정으로 로그인
+2. "Add New... → Project"에서 이 저장소(GitHub repo)를 선택 (Next.js 프로젝트는 자동으로 인식됩니다)
+3. 배포 전에 **Environment Variables**에 아래 값을 추가:
+
+   | Key | Value |
+   |---|---|
+   | `TURSO_DATABASE_URL` | 1단계에서 확인한 `libsql://...` 주소 |
+   | `TURSO_AUTH_TOKEN` | 1단계에서 발급한 토큰 |
+   | `ABE_ADMIN_PASSWORD` | 선생님께 알려드릴 로그인 비밀번호 (기본값 `ableenglish`를 꼭 바꾸세요) |
+   | `ABE_FORCE_SECURE_COOKIE` | `true` (Vercel은 HTTPS로 서비스되므로 반드시 true) |
+
+4. "Deploy" 클릭 → 완료되면 `https://프로젝트이름.vercel.app` 같은 주소가 생성됩니다.
+
+이후 이 주소와 `ABE_ADMIN_PASSWORD`로 설정한 비밀번호만 선생님께 문자/카톡으로 보내드리면, 선생님은 설치 없이 브라우저에서 접속해 로그인만 하면 됩니다. 코드를 수정해서 다시 `git push`하면 Vercel이 자동으로 재배포합니다.
+
 ## 데이터 백업
 
-모든 데이터는 `data/academy.db` 파일 하나에 저장됩니다(`.gitignore`에 포함되어 커밋되지 않음). 이 파일만 주기적으로 복사해두면 백업이 됩니다.
+- **로컬에서만 실행하는 경우**: 모든 데이터는 `data/academy.db` 파일 하나에 저장됩니다(`.gitignore`에 포함되어 커밋되지 않음). 이 파일만 주기적으로 복사해두면 백업이 됩니다.
+- **Turso에 배포한 경우**: `turso db dump abe-academy > backup.sql` 명령으로 언제든 전체 데이터를 백업할 수 있습니다.
 
 ## 폴더 구조
 
