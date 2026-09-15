@@ -77,7 +77,7 @@ export async function ConsultationSection({
 }: {
   studentId: number;
 }) {
-  const consultations = getConsultations(studentId);
+  const consultations = await getConsultations(studentId);
   const createAction = createConsultationAction.bind(null, studentId);
 
   return (

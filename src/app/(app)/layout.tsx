@@ -7,9 +7,9 @@ import { Sidebar } from "@/components/Sidebar";
 // 정적 캐싱으로 인해 등록/삭제 직후 목록이 낡아 보이는 일이 없도록 강제로 동적 렌더링한다.
 export const dynamic = "force-dynamic";
 
-export default function AppLayout({ children }: { children: ReactNode }) {
-  const latestPaymentDates = getLatestPaymentDatesByStudent();
-  const students = getStudents().map((s) => ({
+export default async function AppLayout({ children }: { children: ReactNode }) {
+  const latestPaymentDates = await getLatestPaymentDatesByStudent();
+  const students = (await getStudents()).map((s) => ({
     id: s.id,
     name: s.name,
     grade: s.grade,

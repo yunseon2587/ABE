@@ -1,27 +1,46 @@
-import Database from "better-sqlite3";
+import { createClient, type Client } from "@libsql/client";
 import path from "path";
 import fs from "fs";
 
-const dataDir = path.join(process.cwd(), "data");
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
-}
+// 로컬 개발 시에는 로컬 SQLite 파일을 그대로 쓰고, 배포 환경(Vercel 등)에서는
+// TURSO_DATABASE_URL/TURSO_AUTH_TOKEN을 지정해 Turso(호스팅 SQLite)에 연결한다.
+// Vercel 같은 서버리스 환경은 파일시스템이 요청마다/배포마다 초기화될 수 있어
+// 로컬 파일에만 의존하면 데이터가 유지되지 않는다.
+const tursoUrl = process.env.TURSO_DATABASE_URL;
+const tursoAuthToken = process.env.TURSO_AUTH_TOKEN;
 
-const dbPath = path.join(dataDir, "academy.db");
+let url: string;
+if (tursoUrl) {
+  url = tursoUrl;
+} else {
+  const dataDir = path.join(process.cwd(), "data");
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+  url = `file:${path.join(dataDir, "academy.db")}`;
+}
 
 declare global {
-  var __academyDb: Database.Database | undefined;
+  var __academyDb: Client | undefined;
 }
 
-const db = globalThis.__academyDb ?? new Database(dbPath);
+const db =
+  globalThis.__academyDb ??
+  createClient(tursoAuthToken ? { url, authToken: tursoAuthToken } : { url });
 if (process.env.NODE_ENV !== "production") {
   globalThis.__academyDb = db;
 }
 
-db.pragma("journal_mode = WAL");
-db.pragma("foreign_keys = ON");
+await db.execute("PRAGMA foreign_keys = ON");
+if (!tursoUrl) {
+  // 로컬 파일 모드에서는 Next.js 빌드가 여러 워커 프로세스를 동시에 띄워
+  // 같은 파일에 접근하므로, WAL 모드 + busy_timeout으로 SQLITE_BUSY(락 충돌)를 방지한다.
+  // Turso(원격) 연결에서는 서버가 동시성을 알아서 처리하므로 필요 없다.
+  await db.execute("PRAGMA journal_mode = WAL");
+  await db.execute("PRAGMA busy_timeout = 5000");
+}
 
-db.exec(`
+await db.executeMultiple(`
   CREATE TABLE IF NOT EXISTS students (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
@@ -119,15 +138,14 @@ db.exec(`
 `);
 
 // students 테이블이 gender/payment_day 컬럼 없이 먼저 만들어졌던 기존 DB를 위한 마이그레이션.
-function ensureColumn(table: string, column: string, definition: string) {
-  const columns = db.prepare(`PRAGMA table_info(${table})`).all() as {
-    name: string;
-  }[];
-  if (!columns.some((c) => c.name === column)) {
-    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+async function ensureColumn(table: string, column: string, definition: string) {
+  const result = await db.execute(`PRAGMA table_info(${table})`);
+  const exists = result.rows.some((row) => row.name === column);
+  if (!exists) {
+    await db.execute(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
   }
 }
-ensureColumn("students", "gender", "TEXT");
-ensureColumn("students", "payment_day", "INTEGER");
+await ensureColumn("students", "gender", "TEXT");
+await ensureColumn("students", "payment_day", "INTEGER");
 
 export default db;

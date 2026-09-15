@@ -85,7 +85,7 @@ function ExamFields({ exam }: { exam?: SchoolExam }) {
 }
 
 export async function SchoolExamSection({ studentId }: { studentId: number }) {
-  const exams = getSchoolExams(studentId);
+  const exams = await getSchoolExams(studentId);
   const createAction = createSchoolExamAction.bind(null, studentId);
 
   const chartPoints = exams

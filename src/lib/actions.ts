@@ -29,7 +29,7 @@ export async function createStudentAction(formData: FormData) {
   const name = str(formData, "name");
   if (!name) throw new Error("이름을 입력해주세요.");
 
-  const id = data.createStudent({
+  const id = await data.createStudent({
     name,
     grade: str(formData, "grade"),
     school: str(formData, "school"),
@@ -43,7 +43,7 @@ export async function createStudentAction(formData: FormData) {
   // 상담 예정/완료 문의자를 정식 학생으로 등록 전환하는 경우, 문의자 기록은 정리한다.
   const prospectId = Number(formData.get("prospect_id"));
   if (prospectId) {
-    data.deleteProspect(prospectId);
+    await data.deleteProspect(prospectId);
   }
 
   revalidatePath("/", "layout");
@@ -57,7 +57,7 @@ export async function updateStudentAction(
   const name = str(formData, "name");
   if (!name) throw new Error("이름을 입력해주세요.");
 
-  data.updateStudent(studentId, {
+  await data.updateStudent(studentId, {
     name,
     grade: str(formData, "grade"),
     school: str(formData, "school"),
@@ -73,7 +73,7 @@ export async function updateStudentAction(
 }
 
 export async function deleteStudentAction(studentId: number) {
-  data.deleteStudent(studentId);
+  await data.deleteStudent(studentId);
   revalidatePath("/", "layout");
   redirect("/");
 }
@@ -89,7 +89,7 @@ export async function createConsultationAction(
     throw new Error("날짜와 내용을 입력해주세요.");
   }
 
-  data.createConsultation({
+  await data.createConsultation({
     student_id: studentId,
     consult_date,
     status: status === "planned" ? "planned" : "completed",
@@ -113,7 +113,7 @@ export async function updateConsultationAction(
     throw new Error("날짜와 내용을 입력해주세요.");
   }
 
-  data.updateConsultation(consultationId, {
+  await data.updateConsultation(consultationId, {
     consult_date,
     status: status === "planned" ? "planned" : "completed",
     content,
@@ -128,7 +128,7 @@ export async function deleteConsultationAction(
   studentId: number,
   consultationId: number
 ) {
-  data.deleteConsultation(consultationId);
+  await data.deleteConsultation(consultationId);
   revalidatePath(`/students/${studentId}`);
   revalidatePath("/");
 }
@@ -144,7 +144,7 @@ export async function createSkillCheckAction(
     throw new Error("카테고리, 날짜, 수준을 입력해주세요.");
   }
 
-  data.createSkillCheck({
+  await data.createSkillCheck({
     student_id: studentId,
     category,
     level,
@@ -167,7 +167,7 @@ export async function updateSkillCheckAction(
     throw new Error("카테고리, 날짜, 수준을 입력해주세요.");
   }
 
-  data.updateSkillCheck(skillCheckId, {
+  await data.updateSkillCheck(skillCheckId, {
     category,
     level,
     note: str(formData, "note"),
@@ -181,7 +181,7 @@ export async function deleteSkillCheckAction(
   studentId: number,
   skillCheckId: number
 ) {
-  data.deleteSkillCheck(skillCheckId);
+  await data.deleteSkillCheck(skillCheckId);
   revalidatePath(`/students/${studentId}`);
 }
 
@@ -196,7 +196,7 @@ export async function createWeeklyTestAction(
     throw new Error("날짜와 점수를 입력해주세요.");
   }
 
-  data.createWeeklyTest({
+  await data.createWeeklyTest({
     student_id: studentId,
     test_date,
     test_name: str(formData, "test_name"),
@@ -220,7 +220,7 @@ export async function updateWeeklyTestAction(
     throw new Error("날짜와 점수를 입력해주세요.");
   }
 
-  data.updateWeeklyTest(weeklyTestId, {
+  await data.updateWeeklyTest(weeklyTestId, {
     test_date,
     test_name: str(formData, "test_name"),
     score,
@@ -235,7 +235,7 @@ export async function deleteWeeklyTestAction(
   studentId: number,
   weeklyTestId: number
 ) {
-  data.deleteWeeklyTest(weeklyTestId);
+  await data.deleteWeeklyTest(weeklyTestId);
   revalidatePath(`/students/${studentId}`);
 }
 
@@ -246,7 +246,7 @@ export async function createProspectAction(formData: FormData) {
     throw new Error("이름과 상담 예정일을 입력해주세요.");
   }
 
-  data.createProspect({
+  await data.createProspect({
     name,
     grade: str(formData, "grade"),
     school: str(formData, "school"),
@@ -263,12 +263,12 @@ export async function setProspectStatusAction(
   prospectId: number,
   status: ProspectStatus
 ) {
-  data.updateProspectStatus(prospectId, status);
+  await data.updateProspectStatus(prospectId, status);
   revalidatePath("/");
 }
 
 export async function deleteProspectAction(prospectId: number) {
-  data.deleteProspect(prospectId);
+  await data.deleteProspect(prospectId);
   revalidatePath("/");
 }
 
@@ -282,7 +282,7 @@ export async function createPaymentAction(
     throw new Error("결제일과 금액을 입력해주세요.");
   }
 
-  data.createPayment({
+  await data.createPayment({
     student_id: studentId,
     paid_date,
     amount,
@@ -304,7 +304,7 @@ export async function updatePaymentAction(
     throw new Error("결제일과 금액을 입력해주세요.");
   }
 
-  data.updatePayment(paymentId, {
+  await data.updatePayment(paymentId, {
     paid_date,
     amount,
     period: str(formData, "period"),
@@ -318,7 +318,7 @@ export async function deletePaymentAction(
   studentId: number,
   paymentId: number
 ) {
-  data.deletePayment(paymentId);
+  await data.deletePayment(paymentId);
   revalidatePath(`/students/${studentId}`);
 }
 
@@ -333,7 +333,7 @@ export async function createSchoolExamAction(
     throw new Error("날짜와 점수를 입력해주세요.");
   }
 
-  data.createSchoolExam({
+  await data.createSchoolExam({
     student_id: studentId,
     exam_date,
     exam_name: str(formData, "exam_name"),
@@ -357,7 +357,7 @@ export async function updateSchoolExamAction(
     throw new Error("날짜와 점수를 입력해주세요.");
   }
 
-  data.updateSchoolExam(examId, {
+  await data.updateSchoolExam(examId, {
     exam_date,
     exam_name: str(formData, "exam_name"),
     score,
@@ -369,7 +369,7 @@ export async function updateSchoolExamAction(
 }
 
 export async function deleteSchoolExamAction(studentId: number, examId: number) {
-  data.deleteSchoolExam(examId);
+  await data.deleteSchoolExam(examId);
   revalidatePath(`/students/${studentId}`);
 }
 
@@ -382,7 +382,7 @@ export async function createMakeupClassAction(
     throw new Error("결석일을 입력해주세요.");
   }
 
-  data.createMakeupClass({
+  await data.createMakeupClass({
     student_id: studentId,
     absence_date,
     makeup_date: str(formData, "makeup_date"),
@@ -403,7 +403,7 @@ export async function updateMakeupClassAction(
     throw new Error("결석일을 입력해주세요.");
   }
 
-  data.updateMakeupClass(makeupClassId, {
+  await data.updateMakeupClass(makeupClassId, {
     absence_date,
     makeup_date: str(formData, "makeup_date"),
     memo: str(formData, "memo"),
@@ -417,7 +417,7 @@ export async function deleteMakeupClassAction(
   studentId: number,
   makeupClassId: number
 ) {
-  data.deleteMakeupClass(makeupClassId);
+  await data.deleteMakeupClass(makeupClassId);
   revalidatePath(`/students/${studentId}`);
   revalidatePath("/");
 }

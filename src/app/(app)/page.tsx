@@ -39,11 +39,11 @@ function toProspectQuery(p: {
   return `/students/new?${params.toString()}`;
 }
 
-export default function HomePage() {
-  const students = getStudents();
-  const upcomingConsultations = getUpcomingConsultations(8);
-  const plannedProspects = getProspects("planned");
-  const doneProspects = getProspects("done");
+export default async function HomePage() {
+  const students = await getStudents();
+  const upcomingConsultations = await getUpcomingConsultations(8);
+  const plannedProspects = await getProspects("planned");
+  const doneProspects = await getProspects("done");
 
   const gradeCounts = new Map<string, number>();
   for (const s of students) {
@@ -54,7 +54,7 @@ export default function HomePage() {
     compareGrades(a[0], b[0])
   );
 
-  const latestPaymentDates = getLatestPaymentDatesByStudent();
+  const latestPaymentDates = await getLatestPaymentDatesByStudent();
   const overdueStudents = students
     .map((s) => ({
       student: s,
@@ -68,7 +68,7 @@ export default function HomePage() {
   const calendarMonth = now.getMonth() + 1;
   const monthStart = `${calendarYear}-${String(calendarMonth).padStart(2, "0")}-01`;
   const monthEnd = `${calendarYear}-${String(calendarMonth).padStart(2, "0")}-31`;
-  const makeupItems = getMakeupClassesInRange(monthStart, monthEnd);
+  const makeupItems = await getMakeupClassesInRange(monthStart, monthEnd);
 
   type UpcomingItem =
     | {
